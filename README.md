@@ -3,7 +3,7 @@
 Scripts for DNS Function on Windows Clients  
   
 **-------------------------------------------**  
-**Get-DomainDNS.ps1** (Currently in development)  
+**DomainDNS.psm1** (Currently in development)  
 **-------------------------------------------**  
   
 The Purpose of these functions is to update all Domain Member Server DNS Addresses. After performing a DCPROMO and adding new Domain DNS Servers, this script can be used with SCCM to quickly update all member Servers DNS information.  
@@ -12,6 +12,11 @@ The Purpose of these functions is to update all Domain Member Server DNS Address
  Get-DNSInfo  
  Set-DNSInfo  
  Set-DNSInfoAddress  
+   
+**Installation**  
+
+Import-Module DNSInfo  
+   
    
 ##############  
 **Get-DNSInfo**  
