@@ -19,7 +19,16 @@
 
 Function Get-DNSInfo {
     <#
-	.EXTERNALHELP DNSInfo.psm1-Help.xml
+
+	.DESCRIPTION
+Function to Get DNS Addresses from Domain Joined clients
+
+.EXAMPLE
+Get-DNSInfo
+
+.PARAMETER NoOutPut
+Doesn't output current DNS information
+
 #>
     [CmdletBinding()]
     Param
@@ -67,8 +76,35 @@ Function Get-DNSInfo {
 
 Function Set-DNSInfo {
     <#
-	.EXTERNALHELP DNSInfo.psm1-Help.xml
-#>
+
+.DESCRIPTION
+Function to set new DNS Addresses for Domain Joined clients
+
+.PARAMETER LogDir
+Specify the Directory to save DNSInfo.log to. %TEMP% is the default directory
+
+.PARAMETER NewDNS
+Specify the new Client DNS Servers, in order of preference
+
+.PARAMETER Backup
+Choose to backup the existing DNS Addresses for recovery
+
+.PARAMETER BackupDir
+Specify the folder to backup the existing DNS Addresses for recovery. %TEMP% is the default directory
+
+.PARAMETER LogDir
+Specify folder for DNSInfo.log
+
+.PARAMETER ResetLog
+Specify if existing log file should be overwritten
+
+.PARAMETER SkipDHCPCheck
+Specify if the script should check if the Client gets it's IP Address from a DHCP server
+
+.EXAMPLE
+Set-DNSInfo -NewDNS 1.1.1.1,2.2.2.2,3.3.3.3,4.4.4.4 -Backup True -ResetLog True -SkipDHCPCheck True -BackupDir "C:\Logs" -LogDir "C:\Logs"
+
+    #>
 
     [CmdletBinding()]
     Param
@@ -231,7 +267,12 @@ Function Set-DNSInfo {
 
 Function Set-DNSInfoAddress {
     <#
-	.EXTERNALHELP DNSInfo.psm1-Help.xml
+
+.DESCRIPTION
+Function to Set DNS Addresses for the Domain Connected Adapter. No prompts. Suggest using Set-DNSInfo instead
+
+.EXAMPLE
+Set-DNSInfo 1.1.1.1,2,2,2,2
 #>
     [CmdletBinding()]
     Param
