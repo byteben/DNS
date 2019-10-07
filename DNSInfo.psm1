@@ -114,13 +114,10 @@ Set-DNSInfo -NewDNS 1.1.1.1,2.2.2.2,3.3.3.3,4.4.4.4 -Backup -ResetLog -SkipDHCPC
         [Parameter(Mandatory = $True)]
         [ValidateScript( { $_ -match [IPAddress]$_ })] 
         [String[]]$NewDNS,
-        [ValidateSet('True', 'False')] 
         [Switch]$Backup = $False,
-        [ValidateSet('True', 'False')] 
         [Switch]$ResetLog = $False,
         [String]$LogDir = $ENV:TEMP,
         [String]$BackupDir = $ENV:TEMP,
-        [ValidateSet('True', 'False')] 
         [Switch]$SkipDHCPCheck = $False
     )
 
