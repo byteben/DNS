@@ -9,6 +9,8 @@
     ===========================================================================
     
     Version:
+    1.0.2   07/10/2019  Ben Whitmore - Thanks to @IISResetMe
+    Used Switch for Parameters -Backup, -SkipDHCPCheck, -ResetLog
 
     1.0.1   07/10/2019  Ben Whitmore
     Updated Validate Set for Set-DNSInfo Parameters
@@ -102,7 +104,7 @@ Specify if existing log file should be overwritten
 Specify if the script should check if the Client gets it's IP Address from a DHCP server
 
 .EXAMPLE
-Set-DNSInfo -NewDNS 1.1.1.1,2.2.2.2,3.3.3.3,4.4.4.4 -Backup True -ResetLog True -SkipDHCPCheck True -BackupDir "C:\Logs" -LogDir "C:\Logs"
+Set-DNSInfo -NewDNS 1.1.1.1,2.2.2.2,3.3.3.3,4.4.4.4 -Backup -ResetLog -SkipDHCPCheck -BackupDir "C:\Logs" -LogDir "C:\Logs"
 
     #>
 
@@ -113,13 +115,13 @@ Set-DNSInfo -NewDNS 1.1.1.1,2.2.2.2,3.3.3.3,4.4.4.4 -Backup True -ResetLog True 
         [ValidateScript( { $_ -match [IPAddress]$_ })] 
         [String[]]$NewDNS,
         [ValidateSet('True', 'False')] 
-        [String]$Backup = 'False',
+        [Switch]$Backup = $False,
         [ValidateSet('True', 'False')] 
-        [String]$ResetLog = 'False',
+        [Switch]$ResetLog = $False,
         [String]$LogDir = $ENV:TEMP,
         [String]$BackupDir = $ENV:TEMP,
         [ValidateSet('True', 'False')] 
-        [String]$SkipDHCPCheck = 'False'
+        [Switch]$SkipDHCPCheck = $False
     )
 
     #Set Logging Location
@@ -145,7 +147,7 @@ Set-DNSInfo -NewDNS 1.1.1.1,2.2.2.2,3.3.3.3,4.4.4.4 -Backup True -ResetLog True 
     $NewLogLine = "`r`n "
 
     #Check if log should be reset
-    If ($ResetLog -eq 'True') {
+    If ($ResetLog -eq $True) {
         #Reset Log FIle and Write Date/Time to Log File
         $NewLogLine + "############################################" > $LogFile
     }
@@ -172,7 +174,7 @@ Set-DNSInfo -NewDNS 1.1.1.1,2.2.2.2,3.3.3.3,4.4.4.4 -Backup True -ResetLog True 
     $DNSArray = Get-DNSInfo
 
     #Backup Existing DNS Information to a txt File. Create new file if one exists 
-    If ($Backup -eq 'True') {
+    If ($Backup -eq $True) {
         If (Test-Path $BackupFile) {
             $DNSArray.DNS_Addresses > $BackupDir"\DNSinfo_Backup_"$LogTimeStamp".txt"  
         }
@@ -183,9 +185,7 @@ Set-DNSInfo -NewDNS 1.1.1.1,2.2.2.2,3.3.3.3,4.4.4.4 -Backup True -ResetLog True 
     }
 
     #Update log if user opted to skip checing if the IP was obtained from a DHCP Server
-    If ($SkipDHCPCheck -eq "True") {
-                                
-        Write-Output "Do Something. SkipDHCPCHeck"
+    If ($SkipDHCPCheck -eq $True) {
         "-----------------------------" >> $LogFile
         "DHCP Prompt?" >> $LogFile
         "-----------------------------" >> $LogFile
