@@ -10,7 +10,7 @@
     
     Version:
     1.0.2   07/10/2019  Ben Whitmore - Thanks to @IISResetMe
-    Used Switch for Parameters -Backup, -SkipDHCPCheck, -ResetLog
+    Used Switch for Parameters -Backup, -SkipDHCPCheck, -ResetLog, -NoOutPut
 
     1.0.1   07/10/2019  Ben Whitmore
     Updated Validate Set for Set-DNSInfo Parameters
@@ -26,7 +26,7 @@ Function Get-DNSInfo {
 Function to Get DNS Addresses from Domain Joined clients
 
 .EXAMPLE
-Get-DNSInfo
+Get-DNSInfo -NoOutput
 
 .PARAMETER NoOutPut
 Doesn't output current DNS information
@@ -35,7 +35,7 @@ Doesn't output current DNS information
     [CmdletBinding()]
     Param
     (
-        [String]$NoOutput = 'False'
+        [Switch]$NoOutput = $False
     )
 
     #Get Domain Connected Network Adapter
@@ -65,12 +65,12 @@ Doesn't output current DNS information
         }
 
         #If the Function was run without the $NoOutPut Parameter then display the Current DNS Information
-        If ($NoOutput -eq 'False') {
+        If ($NoOutput -eq $False) {
             $DNSArray
         }
     }
     else {
-        If ($NoOutput -eq 'False') {
+        If ($NoOutput -eq $False) {
             write-host "This host is not connected to a Domain"
         }
     }
