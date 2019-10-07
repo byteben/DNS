@@ -272,7 +272,7 @@ Function Set-DNSInfoAddress {
 Function to Set DNS Addresses for the Domain Connected Adapter. No prompts. Suggest using Set-DNSInfo instead
 
 .EXAMPLE
-Set-DNSInfo 1.1.1.1,2,2,2,2
+Set-DNSInfoAddress 1.1.1.1,2.2.2.2,3.3.3.3,4.4.4.4
 #>
     [CmdletBinding()]
     Param
