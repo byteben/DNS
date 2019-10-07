@@ -1,8 +1,7 @@
 ﻿<#	
 	===========================================================================
-	 Created with: 	SAPIEN Technologies, Inc., PowerShell Studio 2019 v5.6.158
 	 Created on:   	07/10/2019 11:08
-	 Created by:   	bwhitmore!
+	 Created by:   	Ben Whitmore
 	 Organization: 	
 	 Filename:     	DNSInfo.psd1
 	 -------------------------------------------------------------------------
@@ -25,7 +24,7 @@
 	GUID = 'f96e1061-1ba2-4b97-afa5-530c9f1ad4cb'
 	
 	# Author of this module
-	Author = 'bwhitmore!'
+	Author = 'Ben Whitmore'
 	
 	# Company or vendor of this module
 	CompanyName = ''

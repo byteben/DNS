@@ -1,17 +1,24 @@
 ﻿<#	
 	===========================================================================
-	 Created with: 	SAPIEN Technologies, Inc., PowerShell Studio 2019 v5.6.158
 	 Created on:   	07/10/2019 11:08
-	 Created by:   	bwhitmore!
+	 Created by:   	Ben Whitmore
 	 Organization: 	
 	 Filename:     	DNSInfo.psm1
 	-------------------------------------------------------------------------
 	 Module Name: DNSInfo
-	===========================================================================
+    ===========================================================================
+    
+    Version:
+
+    1.0.1   07/10/2019  Ben Whitmore
+    Updated Validate Set for Set-DNSInfo Parameters
+
+    1.0.0   06/10/2019  Ben Whitmore
+    Initial Release
 #>
 
 Function Get-DNSInfo {
-<#
+    <#
 	.EXTERNALHELP DNSInfo.psm1-Help.xml
 #>
     [CmdletBinding()]
@@ -59,7 +66,7 @@ Function Get-DNSInfo {
 }
 
 Function Set-DNSInfo {
-<#
+    <#
 	.EXTERNALHELP DNSInfo.psm1-Help.xml
 #>
 
@@ -70,7 +77,8 @@ Function Set-DNSInfo {
         [ValidateScript( { $_ -match [IPAddress]$_ })] 
         [String[]]$NewDNS,
         [ValidateSet('True', 'False')] 
-        [String]$Backup,
+        [String]$Backup = 'False',
+        [ValidateSet('True', 'False')] 
         [String]$ResetLog = 'False',
         [String]$LogDir = $ENV:TEMP,
         [String]$BackupDir = $ENV:TEMP,
@@ -120,7 +128,7 @@ Function Set-DNSInfo {
     "Current DNS Address Information" >> $LogFile
     "-----------------------------" >> $LogFile
    
-   #Write current DNS Information to log
+    #Write current DNS Information to log
     Get-DNSInfo >> $LogFile
     $NewLogLine >> $LogFile 
 
@@ -222,7 +230,7 @@ Function Set-DNSInfo {
 }
 
 Function Set-DNSInfoAddress {
-<#
+    <#
 	.EXTERNALHELP DNSInfo.psm1-Help.xml
 #>
     [CmdletBinding()]
