@@ -25,7 +25,35 @@ Returns the DNS Address/es as an array for a Domain Connected Adapter (If one ex
 ##############  
 **Set-DNSInfo**  
 ##############  
-The New DNS Address/es are passed as parameters to this function  
+DNS Address/es are passed as parameters to this function. COnditional logic is applied to check if the client has a "Domain Connected" adapter and whether it is a DHCP Client. By default you are asked if you want to continue the operation for a DHCP client. This check can be bypassed by using the -SkipDHCPCheck parameter.  
+  
+**Parameters**  
+  
+.PARAMETER LogDir  
+Specify the Directory to save DNSInfo.log to. %TEMP% is the default directory  
+  
+.PARAMETER NewDNS  
+Specify the new Client DNS Servers, in order of preference  
+  
+.PARAMETER Backup  
+Choose to backup the existing DNS Addresses for recovery  
+  
+.PARAMETER BackupDir  
+Specify the folder to backup the existing DNS Addresses for recovery. %TEMP% is the default directory  
+  
+.PARAMETER LogDir  
+Specify folder for DNSInfo.log  
+  
+.PARAMETER ResetLog  
+Specify if existing log file should be overwritten  
+  
+.PARAMETER SkipDHCPCheck  
+Specify if the script should check if the Client gets it's IP Address from a DHCP server  
+  
+**Example**  
+  
+  .EXAMPLE
+Set-DNSInfo -NewDNS 1.1.1.1,2.2.2.2,3.3.3.3,4.4.4.4 -Backup True -ResetLog True -SkipDHCPCheck True -BackupDir "C:\Logs" -LogDir "C:\Logs"  
   
 ##############  
 **Set-DNSInfoAddress**  
