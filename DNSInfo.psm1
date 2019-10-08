@@ -9,6 +9,9 @@
     ===========================================================================
     
     Version:
+    1.1.1   08/10/2019  Ben Whitmore - Thanks to @guyrleech
+    Changed Regex for IP Address matching to [ipaddress]
+
     1.1.0   08/10/2019  Ben Whitmore - Thanks to @guyrleech
     -Changed NewDNS parameter to a string from an array so it can be used easily with SCCM Run Script. 
     SCCM flattens the array if you pass objects in a string e.g. 1.1.1.1,2.2.2.2,3.3.3.3
@@ -130,11 +133,11 @@ Set-DNSInfo -NewDNS "1.1.1.1,2.2.2.2,3.3.3.3,4.4.4.4" -Backup -ResetLog -SkipDHC
     $NewDNSArray = $NewDNS.split(',')
     #Check all IPs are valid
     ForEach ($IP in $NewDNSArray) {
-        If ($IP -match "(\b(([01]?\d?\d|2[0-4]\d|25[0-5])\.){3}([01]?\d?\d|2[0-4]\d|25[0-5])\b)") {
+        If ($IP -As [ipaddress] -As [Bool]) {
             $DNSCheck = 'Pass' 
         }
         else {
-            Write-Output $IP "is an invalid IP Address. Please try again" 
+            Write-Output $IP" is an invalid IP Address. Please try again" 
             $DNSCheck = $Null
             Return
         }
@@ -327,19 +330,23 @@ Set-DNSInfoAddress "1.1.1.1,2.2.2.2,3.3.3.3,4.4.4.4"
 
     #Check all IPs are valid
     ForEach ($IP in $NewDNSArray) {
-        If ($IP -match "(\b(([01]?\d?\d|2[0-4]\d|25[0-5])\.){3}([01]?\d?\d|2[0-4]\d|25[0-5])\b)") {
+        If ($IP -As [ipaddress] -As [Bool]) {
             write-host $IP "is valid" 
-        } else {
+            $DNSCheck = 'Pass'
+        }
+        else {
             write-host $IP "is an invalid IP Address. Please try again" 
+            Return
         }
     }
+    If ($DNSCheck -eq 'Pass') {
+        #Get Domain Connected adapter from Get-DNSInfo Function
+        Get-DNSInfo -NoOutput 
 
-    #Get Domain Connected adapter from Get-DNSInfo Function
-    Get-DNSInfo -NoOutput 
+        #Select Domain Adapter
+        $DNSAdapterIndex = $DomainAdapter.InterfaceIndex
 
-    #Select Domain Adapter
-    $DNSAdapterIndex = $DomainAdapter.InterfaceIndex
-
-    #Update CLient DNS Address/es
-    Set-DnsClientServerAddress -InterfaceIndex $DNSAdapterIndex -ServerAddresses $NewDNSArray
+        #Update CLient DNS Address/es
+        Set-DnsClientServerAddress -InterfaceIndex $DNSAdapterIndex -ServerAddresses $NewDNSArray
+    }
 }
