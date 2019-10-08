@@ -110,7 +110,7 @@ Specify if existing log file should be overwritten
 Specify if the script should check if the Client gets it's IP Address from a DHCP server
 
 .EXAMPLE
-Set-DNSInfo -NewDNS 1.1.1.1,2.2.2.2,3.3.3.3,4.4.4.4 -Backup -ResetLog -SkipDHCPCheck -BackupDir "C:\Logs" -LogDir "C:\Logs"
+Set-DNSInfo -NewDNS "1.1.1.1,2.2.2.2,3.3.3.3,4.4.4.4" -Backup -ResetLog -SkipDHCPCheck -BackupDir "C:\Logs" -LogDir "C:\Logs"
 
     #>
 
