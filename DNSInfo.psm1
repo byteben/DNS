@@ -9,6 +9,9 @@
     ===========================================================================
     
     Version:
+    1.1.2   08/10/2019  Ben Whitmore - Thanks to @IISResetMe
+    Removed unnecessary parameter default for switch
+
     1.1.1   08/10/2019  Ben Whitmore - Thanks to @guyrleech
     Changed Regex for IP Address matching to [ipaddress]
 
@@ -44,7 +47,7 @@ Doesn't output current DNS information
     [CmdletBinding()]
     Param
     (
-        [Switch]$NoOutput = $False
+        [Switch]$NoOutput
     )
 
     #Get Domain Connected Network Adapter
@@ -122,11 +125,11 @@ Set-DNSInfo -NewDNS "1.1.1.1,2.2.2.2,3.3.3.3,4.4.4.4" -Backup -ResetLog -SkipDHC
     (
         [Parameter(Mandatory = $True)]
         [String]$NewDNS,
-        [Switch]$Backup = $False,
-        [Switch]$ResetLog = $False,
+        [Switch]$Backup,
+        [Switch]$ResetLog,
         [String]$LogDir = $ENV:TEMP,
         [String]$BackupDir = $ENV:TEMP,
-        [Switch]$SkipDHCPCheck = $False
+        [Switch]$SkipDHCPCheck
     )
 
     #Split $NewDNS String
