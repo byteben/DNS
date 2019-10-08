@@ -60,4 +60,10 @@ Set-DNSInfo -NewDNS "1.1.1.1,2.2.2.2,3.3.3.3,4.4.4.4" -Backup -ResetLog -SkipDHC
 ##############  
 Parameters from the Set-DNSInfo function are passed to this function which actually updates the client DNS for the Domain Connected Adapter using Set-DnsClientServerAddress  
   
+  
+##############  
+**SCCM_RunScript.ps1**  
+##############  
+Example of a script to publish in SCCM to leverage DNSInfo. Default Parameter has to be a quoted string to pass multiple IP addresses e.g. "1.1.1.1,2.2.2.2,3.3.3.3,4.4.4.4"  
+  
 **-------------------------------------------**  
