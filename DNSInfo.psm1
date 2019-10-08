@@ -9,6 +9,12 @@
     ===========================================================================
     
     Version:
+    1.1.0   08/10/2019  Ben Whitmore - Thanks to @guyrleech
+    -Changed NewDNS parameter to a string from an array so it can be used easily with SCCM Run Script. 
+    SCCM flattens the array if you pass objects in a string e.g. 1.1.1.1,2.2.2.2,3.3.3.3
+    -String is then split and IP address match is tested. Invalid IP address ends the script and is logged
+    -NewDNS Parameter must be passed with "" e.g "1.1.1.1,2.2.2.2,3.3.3.3"
+
     1.0.2   07/10/2019  Ben Whitmore - Thanks to @IISResetMe
     Used Switch for Parameters -Backup, -SkipDHCPCheck, -ResetLog, -NoOutPut
 
@@ -112,14 +118,27 @@ Set-DNSInfo -NewDNS 1.1.1.1,2.2.2.2,3.3.3.3,4.4.4.4 -Backup -ResetLog -SkipDHCPC
     Param
     (
         [Parameter(Mandatory = $True)]
-        [ValidateScript( { $_ -match [IPAddress]$_ })] 
-        [String[]]$NewDNS,
+        [String]$NewDNS,
         [Switch]$Backup = $False,
         [Switch]$ResetLog = $False,
         [String]$LogDir = $ENV:TEMP,
         [String]$BackupDir = $ENV:TEMP,
         [Switch]$SkipDHCPCheck = $False
     )
+
+    #Split $NewDNS String
+    $NewDNSArray = $NewDNS.split(',')
+    #Check all IPs are valid
+    ForEach ($IP in $NewDNSArray) {
+        If ($IP -match "(\b(([01]?\d?\d|2[0-4]\d|25[0-5])\.){3}([01]?\d?\d|2[0-4]\d|25[0-5])\b)") {
+            $DNSCheck = 'Pass' 
+        }
+        else {
+            Write-Output $IP "is an invalid IP Address. Please try again" 
+            $DNSCheck = $Null
+            Return
+        }
+    }
 
     #Set Logging Location
     $Script:LogFile = $LogDir + "\DNSInfo.log"
@@ -170,98 +189,126 @@ Set-DNSInfo -NewDNS 1.1.1.1,2.2.2.2,3.3.3.3,4.4.4.4 -Backup -ResetLog -SkipDHCPC
     #Get Array from Get-DNSInfo
     $DNSArray = Get-DNSInfo
 
-    #Backup Existing DNS Information to a txt File. Create new file if one exists 
-    If ($Backup -eq $True) {
-        If (Test-Path $BackupFile) {
-            $DNSArray.DNS_Addresses > $BackupDir"\DNSinfo_Backup_"$LogTimeStamp".txt"  
-        }
-        else {
-            $DNSArray.DNS_Addresses > $BackupFile
-        }
+    #Continue if DNS Addresses passed to script are valid
+    If ($DNSCheck -eq 'Pass') {
         
-    }
-
-    #Update log if user opted to skip checing if the IP was obtained from a DHCP Server
-    If ($SkipDHCPCheck -eq $True) {
-        "-----------------------------" >> $LogFile
-        "DHCP Prompt?" >> $LogFile
-        "-----------------------------" >> $LogFile
-        "Parameter passed to skip DHCP Check" >> $LogFile
-        $NewLogLine >> $LogFile 
-    }
-    
-    #Check if DHCP is enabled on Domain Network Adapter
-    ForEach ($DNSItem in $DNSArray) {
-        If ($DNSItem.DHCP_Enabled -eq 'True' -and $SkipDHCPCheck -eq 'False') { 
-
-            #Ask user if they want to continue with the operation
-            Do {
-                $DHCPPrompt = Read-Host "This is a DHCP Client. Are you sure you want to continue? (Y = Yes, N = No)"
-                Switch ($DHCPPrompt) { 
-                    #Answer No
-                    n {
-                        #Update DHCPOtopionOk Variable
-                        $DHCPOptionOk = $True
-
-                        #Write progress to log
-                        Write-Output "Terminated by user at ConfirmOperationDHCP"
-                        "-----------------------------" >> $LogFile
-                        "DHCP Prompt?" >> $LogFile
-                        "-----------------------------" >> $LogFile
-                        "Terminated by user at ConfirmOperationDHCP" >> $LogFile
-                        $NewLogLine >> $LogFile 
-                        Exit
-                    }
-                    #Answer Yes
-                    y {
-                        #Update DHCPOtopionOk Variable
-                        $DHCPOptionOk = $True
-                        
-                        #Write progress to log
-                        "-----------------------------" >> $LogFile
-                        "DHCP Prompt?" >> $LogFile
-                        "-----------------------------" >> $LogFile
-                        "Warning Accepted by user at ConfirmOperationDHCP" >> $LogFile
-                        $NewLogLine >> $LogFile 
-                    }
-                    #Retry on Invalid Option
-                    Default {
-                        $DHCPOptionOk = $False
-                        Write-Output "Invalid Option"
-                    } 
-                } 
+        #Backup Existing DNS Information to a txt File. Create new file if one exists 
+        If ($Backup -eq $True) {
+            If (Test-Path $BackupFile) {
+                $DNSArray.DNS_Addresses > $BackupDir"\DNSinfo_Backup_"$LogTimeStamp".txt"  
             }
-            Until ($DHCPOptionOk)
+            else {
+                $DNSArray.DNS_Addresses > $BackupFile
+            }
+        
+        }
 
-            #Display CUrrent DNS Information
+        #Update log if user opted to skip checing if the IP was obtained from a DHCP Server
+        If ($SkipDHCPCheck -eq $True) {
+            "-----------------------------" >> $LogFile
+            "DHCP Prompt?" >> $LogFile
+            "-----------------------------" >> $LogFile
+            "Parameter passed to skip DHCP Check" >> $LogFile
+            $NewLogLine >> $LogFile 
+        }
+    
+        #Check if DHCP is enabled on Domain Network Adapter
+        ForEach ($DNSItem in $DNSArray) {
+            If ($DNSItem.DHCP_Enabled -eq 'True' -and $SkipDHCPCheck -eq $False) { 
+
+                #Ask user if they want to continue with the operation
+                Do {
+                    $DHCPPrompt = Read-Host "This is a DHCP Client. Are you sure you want to continue? (Y = Yes, N = No)"
+                    Switch ($DHCPPrompt) { 
+                        #Answer No
+                        n {
+                            #Update DHCPOtopionOk Variable
+                            $DHCPOptionOk = $True
+
+                            #Write progress to log
+                            Write-Output "Terminated by user at ConfirmOperationDHCP"
+                            "-----------------------------" >> $LogFile
+                            "DHCP Prompt?" >> $LogFile
+                            "-----------------------------" >> $LogFile
+                            "Terminated by user at ConfirmOperationDHCP" >> $LogFile
+                            $NewLogLine >> $LogFile 
+                            Return
+                        }
+                        #Answer Yes
+                        y {
+                            #Update DHCPOtopionOk Variable
+                            $DHCPOptionOk = $True
+                        
+                            #Write progress to log
+                            "-----------------------------" >> $LogFile
+                            "DHCP Prompt?" >> $LogFile
+                            "-----------------------------" >> $LogFile
+                            "Warning Accepted by user at ConfirmOperationDHCP" >> $LogFile
+                            $NewLogLine >> $LogFile 
+                        }
+                        #Retry on Invalid Option
+                        Default {
+                            $DHCPOptionOk = $False
+                            Write-Output "Invalid Option"
+                        } 
+                    } 
+                }
+                Until ($DHCPOptionOk)
+
+                #Display CUrrent DNS Information
+                Write-Output ""
+                Write-Output "-----------------------------"
+                Write-Output "Getting Current DNS Information....."
+                Write-Output "-----------------------------"
+                Write-Output $DNSArray
+            }
+
+            If ($DNSItem.DHCP_Enabled -eq 'True' -and $SkipDHCPCheck -eq $True) {
+                #Update DHCPOtopionOk Variable
+                $DHCPOptionOk = $True
+                        
+                #Write progress to log
+                "-----------------------------" >> $LogFile
+                "DHCP Prompt?" >> $LogFile
+                "-----------------------------" >> $LogFile
+                "SkipDHCPCheck Param passed to script by user" >> $LogFile
+                $NewLogLine >> $LogFile
+            }
+
+            #Display New DNS Information passed to Function
             Write-Output ""
             Write-Output "-----------------------------"
-            Write-Output "Getting Current DNS Information....."
-            Write-Output "-----------------------------"
-            Write-Output $DNSArray
+            Write-Output "Setting New DNS Addresses....."
+            Write-Output "-----------------------------"    
+            Write-Output $NewDNSArray
+
+            #Write progress to log
+            "-----------------------------" >> $LogFile
+            "DNS Addresses specified as parameters" >> $LogFile
+            "-----------------------------" >> $LogFile
+            $NewDNSArray >> $LogFile
+
+            #Call Set-DNSInfoAddress Function to set the new DNS Addess/es on the Client
+            Set-DNSInfoAddress -NewDNS $NewDNSArray
+
+            #Write progress to log
+            "DNS Servers Updated" >> $LogFile
         }
 
-        #Display New DNS Information passed to Function
-        Write-Output ""
-        Write-Output "-----------------------------"
-        Write-Output "Setting New DNS Addresses....."
-        Write-Output "-----------------------------"    
-        Write-Output $NewDNS
+    }
+    else {
+        #Display error of incorrect IP format used
+        Write-Output "Invalid IP address passed. Please re-run the Set-DNSInfo Function"
 
         #Write progress to log
         "-----------------------------" >> $LogFile
         "DNS Addresses specified as parameters" >> $LogFile
         "-----------------------------" >> $LogFile
-        $NewDNS >> $LogFile
-
-        #Call Set-DNSInfoAddress Function to set the new DNS Addess/es on the Client
-        Set-DNSInfoAddress -NewDNS $NewDNS
-
-        #Write progress to log
-        "DNS Servers Updated" >> $LogFile
+        $NewDNSArray >> $LogFile
+        "Invalid IP address passed"
     }
-}
 
+}
 Function Set-DNSInfoAddress {
     <#
 
@@ -269,23 +316,30 @@ Function Set-DNSInfoAddress {
 Function to Set DNS Addresses for the Domain Connected Adapter. No prompts. Suggest using Set-DNSInfo instead
 
 .EXAMPLE
-Set-DNSInfoAddress 1.1.1.1,2.2.2.2,3.3.3.3,4.4.4.4
+Set-DNSInfoAddress "1.1.1.1,2.2.2.2,3.3.3.3,4.4.4.4"
 #>
     [CmdletBinding()]
     Param
     (
         [Parameter(Mandatory = $True)]
-        [ValidateScript( { $_ -match [IPAddress]$_ })] 
         [String[]]$NewDNS
     )
 
+    #Check all IPs are valid
+    ForEach ($IP in $NewDNSArray) {
+        If ($IP -match "(\b(([01]?\d?\d|2[0-4]\d|25[0-5])\.){3}([01]?\d?\d|2[0-4]\d|25[0-5])\b)") {
+            write-host $IP "is valid" 
+        } else {
+            write-host $IP "is an invalid IP Address. Please try again" 
+        }
+    }
+
     #Get Domain Connected adapter from Get-DNSInfo Function
-    Get-DNSInfo -NoOutput 'True' 
+    Get-DNSInfo -NoOutput 
 
     #Select Domain Adapter
     $DNSAdapterIndex = $DomainAdapter.InterfaceIndex
 
     #Update CLient DNS Address/es
-    Set-DnsClientServerAddress -InterfaceIndex $DNSAdapterIndex -ServerAddresses $NewDNS 
+    Set-DnsClientServerAddress -InterfaceIndex $DNSAdapterIndex -ServerAddresses $NewDNSArray
 }
-
