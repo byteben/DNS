@@ -1,6 +1,20 @@
 # DNS 
   
 Scripts for DNS Function on Windows Clients  
+
+**-------------------------------------------**  
+**DNS_ACL.ps1** (Currently in development)  
+**-------------------------------------------**  
+
+The purpose of this script is to change the ACL on DNS objects.
+When we moved DHCP from a single box to a cluster we implemented the DNS Dynamic Account Credential to allow DHCP servers to create and update new DNS records.
+This account did not have permissions on legacy DNS objects so if the client received a new DHCP request the ADDNS account did not have permissions to update the IP address
+
+The DNS objects are exported to a list from ADDNS and filtered/saved as a CSV. The script will then pull the CSV rows into an array and updte the ACL for each AD Object.
+Currently, only A Records are in scope. Further development is in process to handle the ACL on RPTR DNS Records too. Feel free to contribute!
+
+**EXAMPLE**
+DNS_ACL.ps1 -DomainName "contoso.com" -Account "ddnssvcaccount" -Csv "D:\Scripts\Data\DNSRecords_Export.csv" -ResetLog -LogDir "C:\Logs"
   
 **-------------------------------------------**  
 **DNSInfo.psm1** (Currently in development)  
