@@ -1,0 +1,6 @@
+﻿Name,Type,Data
+vm1,Host (A),172.16.2.1
+vm2,Host (A),172.16.5.2
+vm3,Host (A),172.16.3.3
+vm4,Host (A),172.16.11.4
+vm5,Host (A),172.16.22.5

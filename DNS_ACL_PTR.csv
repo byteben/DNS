@@ -1,0 +1,6 @@
+﻿Name,Type,Data
+172.16.2.1,Pointer (PTR),vm1.contoso.com.
+172.16.5.2,Pointer (PTR),vm2.contoso.com.
+172.16.3.3,Pointer (PTR),vm3.contoso.com.
+172.16.11.4,Pointer (PTR),vm4.contoso.com.
+172.16.22.5,Pointer (PTR),vm5.contoso.com.
