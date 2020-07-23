@@ -2,7 +2,7 @@
 ===========================================================================
 Created on:   7/07/2020 09:08
 Created by:   Ben Whitmore
-Filename:     DNS_ACL.ps1
+Filename:     DNS_ACL_PTR.ps1
 ===========================================================================
 
 .SYNOPSIS
@@ -20,6 +20,9 @@ Specify the SAMAccountName of the "DNS Update Dynamic Credential"
 .PARAMETER CSV
 Specify the full path to the CSV that contains the DNS record names
 
+.PARAMETER DNSZone
+Specify the DNSZone where the DNS records exist. For forward lookup Zones, this may be the same as the DomainName parameter. For reverse lookup zones, enter the PTR format for the nodes in the CSV. e.g." 172.in-addr.arpa"
+
 .PARAMETER ResetLog
 Reset the log file each time the script is run
 
@@ -27,7 +30,7 @@ Reset the log file each time the script is run
 Specify the Log Directory. Default directory is TEMP
 
 .EXAMPLE
-DNS_ACL.ps1 -DomainName "contoso.com" -Account "ddnssvcaccount" -Csv "D:\Scripts\Data\DNSRecords_Export.csv" -ResetLog -LogDir "C:\Logs"
+DNS_ACL_PTR.ps1 -DomainName "contoso.com" -DNSZone "172.in-addr.arpa" -Account "ddnssvcaccount" -Csv "D:\Scripts\Data\DNSRecords_Export.csv" -ResetLog -LogDir "C:\Logs"
 #>
 
 Param
@@ -37,6 +40,7 @@ Param
     [String]$Account,
     [String]$Csv,
     [Switch]$ResetLog,
+    [String]$DNSZone,
     [String]$LogDir = $ENV:TEMP
 )
 
@@ -88,15 +92,20 @@ $AccountSID = (Get-ADUser $Account).SID
 # ForEach ($Computer in ($Computers | Select-Object -First 20)) {
     
 #Process each row in the CSV
-ForEach ($Computer in ($Computers | Select-Object -First 10000) ) {
+ForEach ($Computer in ($Computers) ) {
+
+    #Reverse normal IP into PTR record format - Thanks Adam the Automator
+    $IPAddress = $Computer.Name
+    $Array = $IPAddress.Split('.')
+    $Record = "{0}.{1}.{2}" -f $Array[3], $Array[2], $Array[1]
 
     #Get the full path for the object in DNS
-    $Path = "AD:DC=$($Computer.Name),DC=$DomainName,CN=MicrosoftDNS,DC=DomainDnsZones,DC=$($DomainName.Split('.') -join ',DC=')" 
-    
+    $Path = "AD:DC=$($Record),DC=$DNSZone,CN=MicrosoftDNS,DC=DomainDnsZones,DC=$($DomainName.Split('.') -join ',DC=')" 
+
     #Test if the record exists
     If (!(Test-Path -Path $Path )) {
-        Write-Warning "Record ""$($Computer.Name)"" not found, skipping"
-        Write-Output "Record ""$($Computer.Name)"" not found, skipping" >> $LogFile
+        Write-Warning "Record ""$($Record)"" not found, skipping"
+        Write-Output "Record ""$($Record)"" not found, skipping" >> $LogFile
     }
     else {
 
@@ -104,8 +113,8 @@ ForEach ($Computer in ($Computers | Select-Object -First 10000) ) {
         $AccessRule = New-Object System.DirectoryServices.ActiveDirectoryAccessRule($AccountSID, "GenericAll", "Allow")
 
         #Get existing ACL from AD DNS Object
-        $Acl = Get-Acl -Path $Path        
-        
+        $Acl = Get-Acl -Path $Path
+
         #Append the access rule to the ACL
         $Acl.AddAccessRule($AccessRule)
 
@@ -113,7 +122,7 @@ ForEach ($Computer in ($Computers | Select-Object -First 10000) ) {
         Set-Acl -Path $Path -AclObject $Acl
 
         #Output
-        Write-Output "ACL Updated for DNS Record $($Computer.Name)" 
-        Write-Output "ACL Updated for DNS Record $($Computer.Name)" >> $LogFile
+        Write-Output "ACL Updated for DNS PTR Record $($Computer.Name)" 
+        Write-Output "ACL Updated for DNS PTR Record $($Computer.Name)" >> $LogFile
     }
 }
